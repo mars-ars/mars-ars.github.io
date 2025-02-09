@@ -1,0 +1,28 @@
+name: Build and Push assets to 'main' branch - GH Pages
+'on':
+  push:
+    branches:
+      - develop
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+      - name: Install
+        run: npm install -g npm@8 && npm ci
+        env:
+          CI: ""
+      - name: Build
+        run: npm run build
+        env:
+          CI: ""
+      - name: Push Assets
+        run: |
+          git config --global user.name "gh-actions-robot"
+          git config --global user.email "gh-actions-robot@random-temp-test-robots.inc"
+          git config --global credential.helper store
+          echo "https://${{ secrets.ACCESS_TOKEN }}@github.com" > ~/.git-credentials
+          npm run deploy
