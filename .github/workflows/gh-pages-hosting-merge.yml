@@ -19,10 +19,15 @@ jobs:
         run: npm run build
         env:
           CI: ""
-      - name: Push Assets
+      
+      - name: Push built assets
         run: |
           git config --global user.name "gh-actions-robot"
           git config --global user.email "gh-actions-robot@random-temp-test-robots.inc"
-          git config --global credential.helper store
-          echo "https://${{ secrets.ACCESS_TOKEN }}@github.com" > ~/.git-credentials
-          npm run deploy
+          echo "node_modules/" > .gitignore
+          echo ".cache/" >> .gitignore
+          git add .
+          git commit -m "Built Static Assets"
+          git filter-branch --prune-empty --subdirectory-filter public HEAD
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/mars-ars/mars-ars.github.io
+          git push --force origin HEAD:main
